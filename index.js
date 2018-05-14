@@ -3,8 +3,11 @@ var fs = require("fs");
 
 puppet.launch().then(async (browser) => {
 
+  console.log("Chrome initialized");
+
   var window = await browser.newPage();
   await window.viewport({ width: 1920, height: 1080 });
+  // await window.setJavaScriptEnabled(false);
 
   var lazyLoad = function() {
     var lazyImages = [...document.querySelectorAll(".lazy")];
@@ -17,7 +20,7 @@ puppet.launch().then(async (browser) => {
       });
     });
     var done = Promise.all(loading);
-    return done.then(() => new Promise(ok => setTimeout(ok, 10000)));
+    return done.then(() => new Promise(ok => setTimeout(ok, 5000)));
   };
 
   var mkdir = function(path) {
@@ -38,8 +41,11 @@ puppet.launch().then(async (browser) => {
   };
 
   var visit = async function() {
+    console.log("Loading page...");
     await window.goto("https://seattletimes.com", { waitUntil: "domcontentloaded" });
+    console.log("Running lazy-load script...");
     await window.evaluate(lazyLoad);
+    console.log("Page loaded, taking screenshot...");
     var { folder, path } = getPath();
     mkdir(folder);
     await window.screenshot({ width: 1440, path, fullPage: true });
